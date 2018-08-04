@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script type="text/javascript" src="https://cdn.bootcss.com/vue/2.5.17-beta.0/vue.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/vue-resource/1.5.1/vue-resource.min.js"></script>
+    <title>Document</title>
+    <style>
+        *{
+            text-align: center;
+        }
+      .roombox{
+          margin:auto;
+          background-image: url("http://img4.imgtn.bdimg.com/it/u=2157102041,1638919259&fm=27&gp=0.jpg");
+          background-size: cover;
+          background-repeat: no-repeat;
+          font-size:18px;
+          color:red;
+      }
+      .ply{
+          margin:15px 0;
+      }
+      .ply a{
+          display: inline-block;
+      }
+      .ply a>div,.btn{
+        width:100px;
+          height:30px;
+          color:#fff;
+          background-color:brown;
+          line-height: 30px;
+          border: 1px solid #666666;
+      }
+      .bluebtn{
+        width:100px;
+          height:30px;
+          color:#fff;
+          background-color:blue;
+          line-height: 30px;
+          border: 1px solid #666666;
+      }
+    </style>
+</head>
+<body>
+<div class="gamebox">
+    <div v-if="!kill_home" class="room">
+        <input type="text" v-model="home_num">
+        <input type="button" value="创建房间" @click="createRoom()">
+        <input type="button" value="加入房间" @click="add()">
+    </div>
+    <div class="roombox" v-if="kill_home">
+    <div >房间{{home_num}}开始，请加入</div>
+    <div class="ply"v-for="n in 9">玩家{{n}}号已，点击<a @click="join(n) "><div>加入</div></a>
+        <div v-if="roler!=''">
+            <span v-if="code==n">身份：</span>
+            <span v-if="code ==n">{{roler}}</b>	
+        </div>
+    </div>
+    </div>
+
+</div>
+<script>
+    new Vue({
+        el:'.gamebox',
+        data:{
+            langkill_data:[],
+            code:0,
+            roler:'',
+            kill_home:false,
+            home_num:null,
+        },
+        created(){
+        },
+        methods:{
+            join(n){
+                this.code=n;
+                 console.log(this.langkill_data);
+                 this.roler=this.getRole();
+            },
+            getRole(){
+                if(this.code==this.langkill_data.seer){
+                   return '预言家';
+                }else if(this.langkill_data.Langboy_num.indexOf(this.code)>-1){
+                   return '狼人';
+                }else{
+                    return '村民';
+                }
+            },
+            createRoom(){
+                this.$http.get('http://localhost/test/180728/langkill/Langs.php/',
+                      {
+                          params:{
+                              home_num:this.home_num,
+                              player_type:1
+                          }
+                      }
+                )
+                .then( (data)=>{                          //箭头函数:可以让函数里面的this指向vue的数据
+                 this.langkill_data[0]=data.data;
+                 console.log(this.langkill_data[0]);
+                 this.kill_home=true;
+              })
+            },
+            add(){
+                this.$http.get('http://localhost/test/180728/langkill/Langs.php/',
+                      {
+                          params:{
+                              home_num:this.home_num,
+                              player_type:2
+                          }
+                      }
+                )
+                .then( (data)=>{                          //箭头函数:可以让函数里面的this指向vue的数据
+                    this.langkill_data=data.data
+                    if(this.langkill_data.seer==0){
+                        alert('加入失败');
+                    }else{
+                        this.kill_home=true;
+                    }
+                })
+            }
+        },
+
+    })
+</script>
+</body>
+</html>
